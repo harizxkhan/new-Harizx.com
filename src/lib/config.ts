@@ -14,7 +14,11 @@ export const siteConfig = {
     "AI-powered systems, automation, websites and digital experiences built around real business problems.",
   description:
     "We build AI-powered automation, websites, applications and digital systems that help businesses operate and grow.",
-  url: "https://harizx.com",
+  // Must match the host Vercel serves as primary. harizx.com currently
+  // 308-redirects to www, so www is the canonical home — pointing
+  // canonical/OG/sitemap at the redirecting host confuses crawlers.
+  // If you make the apex primary in Vercel, drop the "www." here too.
+  url: "https://www.harizx.com",
   email: "support@harizx.com",
   location: "Operating worldwide",
   // Verified accounts only. Add a channel here once it actually exists —

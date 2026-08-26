@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/agent/draft-replies",
-      "schedule": "0 * * * *"
+      "schedule": "0 9 * * *"
     }
   ]
 }

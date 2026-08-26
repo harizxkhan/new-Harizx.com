@@ -1,0 +1,530 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ */
+/*  Palette + design tokens (change here to retheme the whole site)   */
+/* ------------------------------------------------------------------ */
+:root {
+  --ink: #050505;
+  --paper: #f5f5f0;
+  --bone: #eae7df;
+  --signal: #ff2a1a;
+  --smoke: #777777;
+  /*
+   * Light-background variants. #777 and #FF2A1A both fall below the
+   * 4.5:1 minimum for small text on --paper / --bone, so light
+   * sections use these darker pairs for body copy, labels, and any
+   * red accent under 24px. The bright originals stay for dark
+   * sections and for large display type, which only needs 3:1.
+   */
+  --smoke-deep: #616161;
+  --signal-deep: #c0190b;
+  --hairline: rgba(5, 5, 5, 0.14);
+  --hairline-inv: rgba(245, 245, 240, 0.18);
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-bone: var(--bone);
+  --color-signal: var(--signal);
+  --color-smoke: var(--smoke);
+  --color-smoke-deep: var(--smoke-deep);
+  --color-signal-deep: var(--signal-deep);
+  --font-display: var(--font-display), Impact, sans-serif;
+  --font-body: var(--font-body), system-ui, sans-serif;
+  --font-mono: var(--font-mono), "SF Mono", monospace;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Base                                                               */
+/* ------------------------------------------------------------------ */
+html {
+  scroll-behavior: smooth;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+body {
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+
+::selection {
+  background: var(--signal);
+  color: var(--paper);
+}
+
+/* Visible focus for keyboard users */
+:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 3px;
+}
+
+/* Skip link — offscreen until focused by keyboard */
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 50%;
+  z-index: 200;
+  transform: translate(-50%, -200%);
+  padding: 0.75rem 1.25rem;
+  border-radius: 9999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: transform 0.2s ease;
+}
+
+.skip-link:focus-visible {
+  transform: translate(-50%, 0);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Ultrawide guard                                                    */
+/*                                                                     */
+/*  Sections are deliberately full-bleed, but past ~1800px that stops  */
+/*  reading as editorial and starts reading as stretched. Pad the      */
+/*  gutters symmetrically so the composition stays centred and         */
+/*  measured on very large displays, without a wrapper element.        */
+/* ------------------------------------------------------------------ */
+@media (min-width: 1800px) {
+  main > section,
+  body > footer {
+    padding-left: calc((100vw - 1800px) / 2 + 3rem);
+    padding-right: calc((100vw - 1800px) / 2 + 3rem);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Typography helpers                                                 */
+/* ------------------------------------------------------------------ */
+/*
+ * Type roles:
+ *  .display    — Sora headlines. Big, tight, expensive. Case is set by
+ *                the content (or an `uppercase` utility), never forced.
+ *  body        — Inter for everything readable.
+ *  .mono-label — IBM Plex Mono, strictly a small technical accent:
+ *                section numbers, coordinates, ids, tiny captions.
+ */
+.display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+.display-light {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+}
+
+.mono-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* Inter-based UI label for nav items and small controls */
+.ui-label {
+  font-family: var(--font-body);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* Comfortable editorial body copy */
+.lead {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.65;
+  letter-spacing: 0;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Texture: film grain overlay                                        */
+/* ------------------------------------------------------------------ */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -100%;
+  z-index: 120;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain-shift 0.9s steps(4) infinite;
+}
+
+@keyframes grain-shift {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-2%, 3%); }
+  50% { transform: translate(3%, -2%); }
+  75% { transform: translate(-3%, -3%); }
+  100% { transform: translate(2%, 2%); }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Brand ident                                                        */
+/*                                                                     */
+/*  Static grain only. The site-wide .grain overlay animates its       */
+/*  position; here it stays still so the opening cannot read as        */
+/*  flicker against an otherwise black screen.                         */
+/* ------------------------------------------------------------------ */
+.ident-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------ */
+/*  Marquee                                                            */
+/* ------------------------------------------------------------------ */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Editorial button                                                   */
+/* ------------------------------------------------------------------ */
+.btn-editorial {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  border: 1px solid currentColor;
+  padding: 1.05rem 2rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn-editorial::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: currentColor;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn-editorial:hover::before,
+.btn-editorial:focus-visible::before {
+  transform: scaleY(1);
+}
+
+.btn-editorial > * {
+  transition: inherit;
+}
+
+.btn-editorial.on-dark:hover,
+.btn-editorial.on-dark:focus-visible {
+  color: var(--ink);
+}
+.btn-editorial.on-dark::before {
+  background: var(--paper);
+}
+.btn-editorial.on-light:hover,
+.btn-editorial.on-light:focus-visible {
+  color: var(--paper);
+}
+.btn-editorial.on-light::before {
+  background: var(--ink);
+}
+.btn-editorial.on-signal:hover,
+.btn-editorial.on-signal:focus-visible {
+  color: var(--paper);
+}
+.btn-editorial.on-signal::before {
+  background: var(--signal);
+}
+
+/* Link underline sweep */
+.link-sweep {
+  position: relative;
+}
+.link-sweep::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s cubic-bezier(0.65, 0, 0.35, 1);
+}
+.link-sweep:hover::after,
+.link-sweep:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Floating pill navigation                                           */
+/*                                                                     */
+/*  In the components layer so Tailwind utilities still win — the       */
+/*  responsive `hidden` / `lg:inline-flex` toggles on the CTA and       */
+/*  menu button must override the `display` set here.                   */
+/* ------------------------------------------------------------------ */
+@layer components {
+.nav-pill {
+  --pill-bg: rgba(20, 20, 20, 0.55);
+  --pill-border: rgba(255, 255, 255, 0.1);
+  --pill-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 66px;
+  padding: 0 10px;
+  border-radius: 9999px;
+  border: 1px solid var(--pill-border);
+  background: var(--pill-bg);
+  box-shadow: var(--pill-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  backdrop-filter: blur(14px) saturate(140%);
+  transition:
+    height 0.45s cubic-bezier(0.65, 0, 0.35, 1),
+    background-color 0.45s ease,
+    border-color 0.45s ease,
+    box-shadow 0.45s ease,
+    backdrop-filter 0.45s ease;
+}
+
+/* Inner highlight: a hairline of light along the top edge */
+.nav-pill::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.09),
+    rgba(255, 255, 255, 0) 55%
+  );
+}
+
+/* Scrolled: tighter, darker, deeper blur */
+.nav-pill[data-scrolled="true"] {
+  --pill-bg: rgba(12, 12, 12, 0.8);
+  --pill-border: rgba(255, 255, 255, 0.14);
+  --pill-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+  height: 58px;
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+
+/* Nav link with a left-to-right underline sweep */
+.nav-link {
+  position: relative;
+  padding: 0.5rem 0.875rem;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: rgba(245, 245, 240, 0.62);
+  border-radius: 9999px;
+  transition: color 0.25s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--paper);
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0.875rem;
+  right: 0.875rem;
+  bottom: 0.25rem;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.28s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Active: understated — full-strength text plus a persistent hairline */
+.nav-link[aria-current="true"] {
+  color: var(--paper);
+}
+
+.nav-link[aria-current="true"]::after {
+  transform: scaleX(1);
+  background: var(--signal);
+}
+
+/* Primary CTA capsule */
+.nav-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 42px;
+  padding: 0 1.15rem;
+  border-radius: 9999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.045em;
+  white-space: nowrap;
+  transition:
+    background-color 0.25s ease,
+    transform 0.25s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.nav-cta:hover,
+.nav-cta:focus-visible {
+  background: #ffffff;
+  transform: scale(1.035);
+}
+
+.nav-cta svg {
+  transition: transform 0.25s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.nav-cta:hover svg,
+.nav-cta:focus-visible svg {
+  transform: translateX(3px);
+}
+
+/* Mobile menu trigger inside the pill */
+.nav-burger {
+  display: flex;
+  height: 42px;
+  width: 42px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--paper);
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease;
+}
+
+.nav-burger:hover,
+.nav-burger:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-cta:hover,
+  .nav-cta:focus-visible {
+    transform: none;
+  }
+}
+} /* end @layer components — floating pill navigation */
+
+/* ------------------------------------------------------------------ */
+/*  Custom cursor                                                      */
+/* ------------------------------------------------------------------ */
+@media (pointer: fine) {
+  .cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 200;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--signal);
+    mix-blend-mode: exclusion;
+    transition:
+      width 0.25s cubic-bezier(0.65, 0, 0.35, 1),
+      height 0.25s cubic-bezier(0.65, 0, 0.35, 1),
+      background-color 0.25s;
+  }
+  .cursor-dot[data-variant="view"],
+  .cursor-dot[data-variant="go"],
+  .cursor-dot[data-variant="explore"] {
+    width: 72px;
+    height: 72px;
+    background: var(--paper);
+  }
+  .cursor-dot span {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    color: var(--ink);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .cursor-dot[data-variant="view"] span,
+  .cursor-dot[data-variant="go"] span,
+  .cursor-dot[data-variant="explore"] span {
+    opacity: 1;
+  }
+}
+
+@media (pointer: coarse) {
+  .cursor-dot {
+    display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Reduced motion: kill the theatrics                                 */
+/* ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .grain::after {
+    animation: none;
+  }
+  .marquee-track {
+    animation: none !important;
+    transform: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

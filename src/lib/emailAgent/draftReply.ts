@@ -1,11 +1,8 @@
 import "server-only";
-import Anthropic from "@anthropic-ai/sdk";
 import { siteConfig } from "@/lib/config";
 import { services } from "@/lib/data";
+import { selectProvider } from "./providers";
 import type { IncomingMail } from "./triage";
-
-/** Sonnet balances draft quality against cron latency and cost. */
-const MODEL = process.env.AGENT_MODEL ?? "claude-sonnet-5";
 
 /** Hard cap so one enormous email cannot blow up the token bill. */
 const MAX_BODY_CHARS = 6000;
@@ -48,23 +45,20 @@ export type DraftOutcome =
   | { ok: false; reason: string };
 
 export async function draftReply(mail: IncomingMail): Promise<DraftOutcome> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return { ok: false, reason: "ANTHROPIC_API_KEY is not set" };
+  const provider = selectProvider();
+  if (!provider) {
+    return {
+      ok: false,
+      reason:
+        "No model provider configured. Set GEMINI_API_KEY (free tier) or ANTHROPIC_API_KEY.",
+    };
   }
 
-  const client = new Anthropic({ apiKey });
   const body = mail.body.slice(0, MAX_BODY_CHARS);
 
-  try {
-    const message = await client.messages.create({
-      model: MODEL,
-      max_tokens: 600,
-      system: systemPrompt(),
-      messages: [
-        {
-          role: "user",
-          content: `Draft a reply to this email.
+  const result = await provider.generate(
+    systemPrompt(),
+    `Draft a reply to this email.
 
 From: ${mail.from.name || "(no name)"} <${mail.from.address}>
 Subject: ${mail.subject || "(no subject)"}
@@ -74,24 +68,11 @@ Received: ${mail.date.toISOString()}
 ${body}
 --- end ---
 
-Write only the reply body.`,
-        },
-      ],
-    });
+Write only the reply body.`
+  );
 
-    const text = message.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
-
-    if (!text) return { ok: false, reason: "model returned no text" };
-
-    return { ok: true, body: text };
-  } catch (error) {
-    const reason = error instanceof Error ? error.message : String(error);
-    return { ok: false, reason: `Anthropic API: ${reason}` };
-  }
+  if (!result.ok) return { ok: false, reason: result.reason };
+  return { ok: true, body: result.text };
 }
 
 /**

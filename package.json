@@ -10,7 +10,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.120.0",
     "gsap": "^3.12.7",
     "imapflow": "^1.7.6",
     "lenis": "^1.1.20",

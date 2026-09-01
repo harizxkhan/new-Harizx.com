@@ -15,6 +15,7 @@ import Technology from "@/components/sections/Technology";
 import FinalCTA from "@/components/sections/FinalCTA";
 import ContactForm from "@/components/contact/ContactForm";
 import Footer from "@/components/layout/Footer";
+import ChatWidget from "@/components/chat/ChatWidget";
 
 export default function Home() {
   return (
@@ -37,6 +38,7 @@ export default function Home() {
         <ContactForm />
       </main>
       <Footer />
+      <ChatWidget />
     </SmoothScroll>
   );
 }
